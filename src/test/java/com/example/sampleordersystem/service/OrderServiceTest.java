@@ -32,7 +32,8 @@ class OrderServiceTest {
         sampleId = sample.getId();
 
         H2OrderRepository orderRepo = new H2OrderRepository(conn);
-        orderService = new OrderService(orderRepo);
+        H2SampleRepository sampleRepo = new H2SampleRepository(conn);
+        orderService = new OrderService(orderRepo, sampleRepo);
     }
 
     @AfterEach

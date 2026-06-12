@@ -5,7 +5,9 @@ import com.example.sampleordersystem.model.order.Order;
 import com.example.sampleordersystem.model.order.OrderStatus;
 import com.example.sampleordersystem.model.sample.Sample;
 import com.example.sampleordersystem.repository.impl.H2OrderRepository;
+import com.example.sampleordersystem.repository.impl.H2PendingShipmentStockRepository;
 import com.example.sampleordersystem.repository.impl.H2SampleRepository;
+import com.example.sampleordersystem.repository.impl.H2StockRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +31,9 @@ class SampleServiceTest {
         SchemaInitializer.init(conn);
         H2SampleRepository sampleRepo = new H2SampleRepository(conn);
         orderRepo = new H2OrderRepository(conn);
-        sampleService = new SampleService(sampleRepo, orderRepo);
+        H2StockRepository stockRepo = new H2StockRepository(conn);
+        H2PendingShipmentStockRepository pendingRepo = new H2PendingShipmentStockRepository(conn);
+        sampleService = new SampleService(sampleRepo, orderRepo, stockRepo, pendingRepo);
     }
 
     @AfterEach

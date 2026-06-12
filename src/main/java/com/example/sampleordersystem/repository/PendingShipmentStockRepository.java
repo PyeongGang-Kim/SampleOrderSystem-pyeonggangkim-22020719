@@ -8,4 +8,5 @@ public interface PendingShipmentStockRepository {
     PendingShipmentStock save(PendingShipmentStock stock);
     Optional<PendingShipmentStock> findBySampleId(Long sampleId);
     PendingShipmentStock update(PendingShipmentStock stock);
+    void deleteBySampleId(Long sampleId);
 }

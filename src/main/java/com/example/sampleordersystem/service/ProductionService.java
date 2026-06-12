@@ -11,6 +11,8 @@ import com.example.sampleordersystem.repository.ProductionScheduleRepository;
 import com.example.sampleordersystem.repository.SampleRepository;
 import com.example.sampleordersystem.repository.StockRepository;
 
+import com.example.sampleordersystem.model.order.Order;
+
 import java.util.List;
 
 public class ProductionService {
@@ -31,6 +33,14 @@ public class ProductionService {
         this.pendingRepo = pendingRepo;
         this.orderRepo = orderRepo;
         this.sampleRepo = sampleRepo;
+    }
+
+    public List<ProductionSchedule> getSchedules() {
+        return prodScheduleRepo.findAllOrderByCreatedAt();
+    }
+
+    public List<Order> getPendingOrders() {
+        return orderRepo.findByStatus(OrderStatus.PRODUCING);
     }
 
     public void advance(int minutes) {

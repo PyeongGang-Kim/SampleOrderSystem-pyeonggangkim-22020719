@@ -42,6 +42,17 @@ public class H2PendingShipmentStockRepository implements PendingShipmentStockRep
     }
 
     @Override
+    public void deleteBySampleId(Long sampleId) {
+        String sql = "DELETE FROM pending_shipment_stocks WHERE sample_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, sampleId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("배송대기 재고 삭제 실패", e);
+        }
+    }
+
+    @Override
     public PendingShipmentStock update(PendingShipmentStock stock) {
         String sql = "UPDATE pending_shipment_stocks SET quantity = ? WHERE sample_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

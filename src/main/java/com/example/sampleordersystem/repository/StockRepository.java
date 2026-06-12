@@ -8,4 +8,5 @@ public interface StockRepository {
     Stock save(Stock stock);
     Optional<Stock> findBySampleId(Long sampleId);
     Stock update(Stock stock);
+    void deleteBySampleId(Long sampleId);
 }

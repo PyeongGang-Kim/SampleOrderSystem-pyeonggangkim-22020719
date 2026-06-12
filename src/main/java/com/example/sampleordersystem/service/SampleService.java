@@ -1,10 +1,13 @@
 package com.example.sampleordersystem.service;
 
-import com.example.sampleordersystem.model.order.Order;
+import com.example.sampleordersystem.model.inventory.PendingShipmentStock;
+import com.example.sampleordersystem.model.inventory.Stock;
 import com.example.sampleordersystem.model.order.OrderStatus;
 import com.example.sampleordersystem.model.sample.Sample;
 import com.example.sampleordersystem.repository.OrderRepository;
+import com.example.sampleordersystem.repository.PendingShipmentStockRepository;
 import com.example.sampleordersystem.repository.SampleRepository;
+import com.example.sampleordersystem.repository.StockRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,14 +21,22 @@ public class SampleService {
 
     private final SampleRepository sampleRepo;
     private final OrderRepository orderRepo;
+    private final StockRepository stockRepo;
+    private final PendingShipmentStockRepository pendingRepo;
 
-    public SampleService(SampleRepository sampleRepo, OrderRepository orderRepo) {
+    public SampleService(SampleRepository sampleRepo, OrderRepository orderRepo,
+                         StockRepository stockRepo, PendingShipmentStockRepository pendingRepo) {
         this.sampleRepo = sampleRepo;
         this.orderRepo = orderRepo;
+        this.stockRepo = stockRepo;
+        this.pendingRepo = pendingRepo;
     }
 
     public Sample createSample(String name, double prodRate, double yield) {
-        return sampleRepo.save(new Sample(null, name, prodRate, yield));
+        Sample sample = sampleRepo.save(new Sample(null, name, prodRate, yield));
+        stockRepo.save(new Stock(sample.getId(), 0));
+        pendingRepo.save(new PendingShipmentStock(sample.getId(), 0));
+        return sample;
     }
 
     public List<Sample> getAllSamples() {
@@ -55,11 +66,13 @@ public class SampleService {
     public void deleteSample(Long id) {
         boolean hasActiveOrder = ACTIVE_STATUSES.stream()
                 .flatMap(status -> orderRepo.findByStatus(status).stream())
-                .anyMatch(order -> order.getSampleId().equals(id));
+                .anyMatch(order -> id.equals(order.getSampleId()));
 
         if (hasActiveOrder) {
             throw new IllegalStateException("진행 중인 주문이 있어 시료를 삭제할 수 없습니다: " + id);
         }
+        pendingRepo.deleteBySampleId(id);
+        stockRepo.deleteBySampleId(id);
         sampleRepo.deleteById(id);
     }
 }

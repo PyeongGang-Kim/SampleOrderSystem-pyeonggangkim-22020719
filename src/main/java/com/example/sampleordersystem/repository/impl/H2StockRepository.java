@@ -42,6 +42,17 @@ public class H2StockRepository implements StockRepository {
     }
 
     @Override
+    public void deleteBySampleId(Long sampleId) {
+        String sql = "DELETE FROM stocks WHERE sample_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, sampleId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("재고 삭제 실패", e);
+        }
+    }
+
+    @Override
     public Stock update(Stock stock) {
         String sql = "UPDATE stocks SET quantity = ? WHERE sample_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
