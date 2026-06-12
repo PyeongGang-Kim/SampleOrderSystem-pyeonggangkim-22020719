@@ -152,12 +152,12 @@ CREATE TABLE pending_shipment_stocks (
 
 CREATE TABLE orders (
     id            VARCHAR(50) PRIMARY KEY,   -- YYYYMMDD_NNNN
-    sample_id     BIGINT      NOT NULL,
+    sample_id     BIGINT       NULL,
     customer_name VARCHAR(255) NOT NULL,
     quantity      INT         NOT NULL,
     status        VARCHAR(20) NOT NULL,
     created_at    TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sample_id) REFERENCES samples(id)
+    FOREIGN KEY (sample_id) REFERENCES samples(id) ON DELETE SET NULL
 );
 
 CREATE TABLE production_schedules (
@@ -314,11 +314,11 @@ H2PendingShipmentStockRepository pendingRepo = new H2PendingShipmentStockReposit
 H2ProductionScheduleRepository prodRepo = new H2ProductionScheduleRepository(connection)
 
 // Service
-SampleService sampleSvc = new SampleService(sampleRepo, orderRepo)
+SampleService sampleSvc = new SampleService(sampleRepo, orderRepo, stockRepo, pendingRepo)
 InventoryService inventorySvc = new InventoryService(stockRepo, pendingRepo, orderRepo)
-ProductionService productionSvc = new ProductionService(prodRepo, stockRepo, pendingRepo, orderRepo)
+ProductionService productionSvc = new ProductionService(prodRepo, stockRepo, pendingRepo, orderRepo, sampleRepo)
 OrderService orderSvc = new OrderService(orderRepo, sampleRepo)
-ApprovalService approvalSvc = new ApprovalService(orderRepo, stockRepo, prodRepo)
+ApprovalService approvalSvc = new ApprovalService(orderRepo, stockRepo, pendingRepo, prodRepo)
 ShippingService shippingSvc = new ShippingService(orderRepo, pendingRepo)
 
 // View
@@ -331,14 +331,14 @@ ShippingView shippingView = new ShippingView()
 HomeView homeView = new HomeView()
 
 // Controller
-SampleController sampleCtrl = new SampleController(sampleSvc, sampleView)
-OrderController orderCtrl = new OrderController(orderSvc, orderView)
-ApprovalController approvalCtrl = new ApprovalController(approvalSvc, approvalView)
-MonitorController monitorCtrl = new MonitorController(inventorySvc, orderSvc, monitorView)
-ProductionController prodCtrl = new ProductionController(productionSvc, productionView)
-ShippingController shippingCtrl = new ShippingController(shippingSvc, shippingView)
+SampleController sampleCtrl = new SampleController(sampleSvc, inventorySvc, sampleView)
+OrderController orderCtrl = new OrderController(orderSvc, sampleSvc, orderView)
+ApprovalController approvalCtrl = new ApprovalController(approvalSvc, inventorySvc, orderSvc, sampleSvc, approvalView)
+MonitorController monitorCtrl = new MonitorController(inventorySvc, sampleSvc, orderSvc, monitorView)
+ProductionController productionCtrl = new ProductionController(productionSvc, sampleSvc, productionView)
+ShippingController shippingCtrl = new ShippingController(shippingSvc, orderSvc, sampleSvc, shippingView)
 HomeController homeCtrl = new HomeController(productionSvc, homeView,
-    sampleCtrl, orderCtrl, approvalCtrl, monitorCtrl, prodCtrl, shippingCtrl)
+    sampleCtrl, orderCtrl, approvalCtrl, monitorCtrl, productionCtrl, shippingCtrl)
 
 homeCtrl.run()  // 메인 루프 진입
 ```
