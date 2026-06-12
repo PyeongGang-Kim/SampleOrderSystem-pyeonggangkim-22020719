@@ -33,12 +33,12 @@ public class SchemaInitializer {
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS orders (
                     id            VARCHAR(50) PRIMARY KEY,
-                    sample_id     BIGINT       NOT NULL,
+                    sample_id     BIGINT       NULL,
                     customer_name VARCHAR(255) NOT NULL,
                     quantity      INT          NOT NULL,
                     status        VARCHAR(20)  NOT NULL,
                     created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (sample_id) REFERENCES samples(id)
+                    FOREIGN KEY (sample_id) REFERENCES samples(id) ON DELETE SET NULL
                 )
             """);
             stmt.execute("""

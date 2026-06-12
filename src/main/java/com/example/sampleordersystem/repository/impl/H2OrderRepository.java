@@ -3,8 +3,10 @@ package com.example.sampleordersystem.repository.impl;
 import com.example.sampleordersystem.model.order.Order;
 import com.example.sampleordersystem.model.order.OrderStatus;
 import com.example.sampleordersystem.repository.OrderRepository;
+import com.example.sampleordersystem.util.OrderIdGenerator;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -101,10 +103,17 @@ public class H2OrderRepository implements OrderRepository {
         return 0;
     }
 
+    @Override
+    public String generateNextOrderId(LocalDate date) {
+        return OrderIdGenerator.generate(date, conn);
+    }
+
     private Order mapRow(ResultSet rs) throws SQLException {
+        long rawSampleId = rs.getLong("sample_id");
+        Long sampleId = rs.wasNull() ? null : rawSampleId;
         return new Order(
                 rs.getString("id"),
-                rs.getLong("sample_id"),
+                sampleId,
                 rs.getString("customer_name"),
                 rs.getInt("quantity"),
                 OrderStatus.valueOf(rs.getString("status")),
