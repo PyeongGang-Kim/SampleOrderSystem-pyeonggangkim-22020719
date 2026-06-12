@@ -90,4 +90,35 @@ class OrderServiceTest {
         List<Order> all = orderService.getAllOrders();
         assertEquals(2, all.size());
     }
+
+    @Test
+    void 주문ID로_검색하면_해당_주문이_반환된다() {
+        Order created = orderService.createOrder(sampleId, "홍길동", 100);
+        orderService.createOrder(sampleId, "김철수", 50);
+
+        List<Order> result = orderService.searchOrders(created.getId());
+
+        assertEquals(1, result.size());
+        assertEquals(created.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void 고객명_일부로_검색하면_해당_주문들이_반환된다() {
+        orderService.createOrder(sampleId, "홍길동", 100);
+        orderService.createOrder(sampleId, "홍두깨", 50);
+        orderService.createOrder(sampleId, "김철수", 30);
+
+        List<Order> result = orderService.searchOrders("홍");
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void 검색어와_일치하는_주문이_없으면_빈_목록이_반환된다() {
+        orderService.createOrder(sampleId, "홍길동", 100);
+
+        List<Order> result = orderService.searchOrders("없는고객");
+
+        assertTrue(result.isEmpty());
+    }
 }

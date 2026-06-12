@@ -33,4 +33,8 @@ public class OrderService {
     public List<Order> getAllOrders() {
         return orderRepo.findAll();
     }
+
+    public List<Order> searchOrders(String keyword) {
+        return orderRepo.findByKeyword(keyword);
+    }
 }

@@ -1,6 +1,5 @@
 package com.example.sampleordersystem.controller;
 
-import com.example.sampleordersystem.model.inventory.Stock;
 import com.example.sampleordersystem.model.order.Order;
 import com.example.sampleordersystem.model.order.OrderStatus;
 import com.example.sampleordersystem.model.sample.Sample;
@@ -32,18 +31,65 @@ public class ApprovalController {
     }
 
     public void run() {
+        while (true) {
+            view.showSubMenu();
+            String choice = view.readChoice();
+            switch (choice) {
+                case "1" -> showReservedOrders();
+                case "2" -> showAllOrders();
+                case "3" -> searchOrders();
+                case "0" -> { return; }
+                default -> view.showError("올바른 메뉴를 선택해주세요.");
+            }
+        }
+    }
+
+    private void showReservedOrders() {
         List<Order> reserved = orderSvc.getOrdersByStatus(OrderStatus.RESERVED);
         int page = 1;
         while (true) {
             int total = Paginator.totalPages(reserved);
             List<Order> pageItems = Paginator.paginate(reserved, page);
-            view.showReservedTable(buildHeaders(), buildRows(pageItems), page, total);
+            view.showReservedTable(buildReservedHeaders(), buildReservedRows(pageItems), page, total);
             String nav = view.readPageNav(page, total);
             if ("0".equals(nav)) return;
             if ("p".equals(nav)) { if (page > 1) page--; continue; }
             if ("n".equals(nav)) { if (page < total) page++; continue; }
             processOrderSelection(nav, reserved);
             reserved = orderSvc.getOrdersByStatus(OrderStatus.RESERVED);
+        }
+    }
+
+    private void showAllOrders() {
+        List<Order> orders = orderSvc.getAllOrders();
+        int page = 1;
+        while (true) {
+            int total = Paginator.totalPages(orders);
+            List<Order> pageItems = Paginator.paginate(orders, page);
+            view.showAllOrdersTable(buildAllHeaders(), buildAllRows(pageItems), page, total);
+            String nav = view.readPageNavReadOnly(page, total);
+            if ("0".equals(nav)) return;
+            if ("p".equals(nav)) { if (page > 1) page--; }
+            else if ("n".equals(nav)) { if (page < total) page++; }
+        }
+    }
+
+    private void searchOrders() {
+        String keyword = view.promptSearchKeyword();
+        if (keyword.isBlank()) {
+            view.showError("검색어를 입력해주세요.");
+            return;
+        }
+        List<Order> orders = orderSvc.searchOrders(keyword);
+        int page = 1;
+        while (true) {
+            int total = Paginator.totalPages(orders);
+            List<Order> pageItems = Paginator.paginate(orders, page);
+            view.showSearchResultTable(buildAllHeaders(), buildAllRows(pageItems), page, total);
+            String nav = view.readPageNavReadOnly(page, total);
+            if ("0".equals(nav)) return;
+            if ("p".equals(nav)) { if (page > 1) page--; }
+            else if ("n".equals(nav)) { if (page < total) page++; }
         }
     }
 
@@ -89,17 +135,33 @@ public class ApprovalController {
         }
     }
 
-    private List<String> buildHeaders() {
+    private List<String> buildReservedHeaders() {
         return List.of("주문 ID", "시료명", "고객명", "수량", "등록일시");
     }
 
-    private List<List<String>> buildRows(List<Order> orders) {
+    private List<String> buildAllHeaders() {
+        return List.of("주문 ID", "시료명", "고객명", "수량", "상태", "등록일시");
+    }
+
+    private List<List<String>> buildReservedRows(List<Order> orders) {
         List<List<String>> rows = new ArrayList<>();
         for (Order o : orders) {
             String sampleName = o.getSampleId() == null ? "(삭제됨)" :
                     sampleSvc.findById(o.getSampleId()).map(Sample::getName).orElse("(알 수 없음)");
             rows.add(List.of(o.getId(), sampleName, o.getCustomerName(),
                     String.valueOf(o.getQuantity()), o.getCreatedAt().toString()));
+        }
+        return rows;
+    }
+
+    private List<List<String>> buildAllRows(List<Order> orders) {
+        List<List<String>> rows = new ArrayList<>();
+        for (Order o : orders) {
+            String sampleName = o.getSampleId() == null ? "(삭제됨)" :
+                    sampleSvc.findById(o.getSampleId()).map(Sample::getName).orElse("(알 수 없음)");
+            rows.add(List.of(o.getId(), sampleName, o.getCustomerName(),
+                    String.valueOf(o.getQuantity()), o.getStatus().name(),
+                    o.getCreatedAt().toString()));
         }
         return rows;
     }

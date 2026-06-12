@@ -12,6 +12,7 @@ public interface OrderRepository {
     Optional<Order> findById(String id);
     List<Order> findAll();
     List<Order> findByStatus(OrderStatus status);
+    List<Order> findByKeyword(String keyword);
     void updateStatus(String id, OrderStatus status);
     int countByDatePrefix(String datePrefix);
     String generateNextOrderId(LocalDate date);

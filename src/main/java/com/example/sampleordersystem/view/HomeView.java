@@ -8,7 +8,7 @@ public class HomeView {
         System.out.println("\n========== 시료 생산주문관리 시스템 ==========");
         System.out.println(" 1. 시료 관리");
         System.out.println(" 2. 시료 주문");
-        System.out.println(" 3. 주문 승인/거절");
+        System.out.println(" 3. 주문");
         System.out.println(" 4. 모니터링");
         System.out.println(" 5. 생산 라인");
         System.out.println(" 6. 출고");

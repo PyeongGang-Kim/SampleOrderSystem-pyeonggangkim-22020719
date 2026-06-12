@@ -78,6 +78,24 @@ public class H2OrderRepository implements OrderRepository {
     }
 
     @Override
+    public List<Order> findByKeyword(String keyword) {
+        String sql = "SELECT id, sample_id, customer_name, quantity, status, created_at FROM orders " +
+                     "WHERE id LIKE ? OR customer_name LIKE ? ORDER BY created_at";
+        List<Order> result = new ArrayList<>();
+        String pattern = "%" + keyword + "%";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, pattern);
+            ps.setString(2, pattern);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) result.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("주문 검색 실패", e);
+        }
+        return result;
+    }
+
+    @Override
     public void updateStatus(String id, OrderStatus status) {
         String sql = "UPDATE orders SET status = ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
