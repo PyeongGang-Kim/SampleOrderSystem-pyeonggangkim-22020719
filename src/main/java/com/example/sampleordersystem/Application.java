@@ -53,5 +53,6 @@ public class Application {
                 sampleCtrl, orderCtrl, approvalCtrl, monitorCtrl, productionCtrl, shippingCtrl);
 
         homeCtrl.run();
+        System.exit(0);
     }
 }
