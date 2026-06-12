@@ -11,13 +11,10 @@ import com.example.sampleordersystem.repository.StockRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SampleService {
 
-    private static final Set<OrderStatus> ACTIVE_STATUSES =
-            Set.of(OrderStatus.RESERVED, OrderStatus.PRODUCING, OrderStatus.CONFIRMED);
 
     private final SampleRepository sampleRepo;
     private final OrderRepository orderRepo;
@@ -63,8 +60,13 @@ public class SampleService {
         return sampleRepo.update(sample);
     }
 
+    public String resolveSampleName(Long sampleId) {
+        if (sampleId == null) return "(삭제됨)";
+        return findById(sampleId).map(Sample::getName).orElse("(알 수 없음)");
+    }
+
     public void deleteSample(Long id) {
-        boolean hasActiveOrder = ACTIVE_STATUSES.stream()
+        boolean hasActiveOrder = OrderStatus.ACTIVE_STATUSES.stream()
                 .flatMap(status -> orderRepo.findByStatus(status).stream())
                 .anyMatch(order -> id.equals(order.getSampleId()));
 

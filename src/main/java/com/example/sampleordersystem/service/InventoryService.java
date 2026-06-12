@@ -7,14 +7,9 @@ import com.example.sampleordersystem.repository.OrderRepository;
 import com.example.sampleordersystem.repository.PendingShipmentStockRepository;
 import com.example.sampleordersystem.repository.StockRepository;
 
-import java.util.Set;
-
 public class InventoryService {
 
-    private static final Set<OrderStatus> ACTIVE_STATUSES =
-            Set.of(OrderStatus.RESERVED, OrderStatus.PRODUCING, OrderStatus.CONFIRMED);
-
-    private final StockRepository stockRepo;
+private final StockRepository stockRepo;
     private final PendingShipmentStockRepository pendingRepo;
     private final OrderRepository orderRepo;
 
@@ -42,7 +37,7 @@ public class InventoryService {
     }
 
     private int getOrderedQuantity(Long sampleId) {
-        return ACTIVE_STATUSES.stream()
+        return OrderStatus.ACTIVE_STATUSES.stream()
                 .flatMap(status -> orderRepo.findByStatus(status).stream())
                 .filter(order -> sampleId.equals(order.getSampleId()))
                 .mapToInt(order -> order.getQuantity())

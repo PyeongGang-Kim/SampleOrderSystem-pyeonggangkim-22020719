@@ -1,7 +1,6 @@
 package com.example.sampleordersystem.controller;
 
 import com.example.sampleordersystem.model.production.ProductionSchedule;
-import com.example.sampleordersystem.model.sample.Sample;
 import com.example.sampleordersystem.service.ProductionService;
 import com.example.sampleordersystem.service.SampleService;
 import com.example.sampleordersystem.util.Paginator;
@@ -43,8 +42,7 @@ public class ProductionController {
             return;
         }
         ProductionSchedule current = schedules.get(0);
-        String sampleName = sampleSvc.findById(current.getSampleId())
-                .map(Sample::getName).orElse("(알 수 없음)");
+        String sampleName = sampleSvc.resolveSampleName(current.getSampleId());
         int remaining = current.getTargetQuantity() - current.getProducedQuantity();
         view.showCurrentScheduleDetail(
                 String.valueOf(current.getId()),
@@ -77,8 +75,7 @@ public class ProductionController {
     private List<List<String>> buildScheduleRows(List<ProductionSchedule> schedules) {
         List<List<String>> rows = new ArrayList<>();
         for (ProductionSchedule s : schedules) {
-            String sampleName = sampleSvc.findById(s.getSampleId())
-                    .map(Sample::getName).orElse("(알 수 없음)");
+            String sampleName = sampleSvc.resolveSampleName(s.getSampleId());
             int remaining = s.getTargetQuantity() - s.getProducedQuantity();
             rows.add(List.of(
                     String.valueOf(s.getId()), s.getOrderId(), sampleName,

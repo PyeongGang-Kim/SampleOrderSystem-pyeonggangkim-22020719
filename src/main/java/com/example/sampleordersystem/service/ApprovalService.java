@@ -56,9 +56,8 @@ public class ApprovalService {
     }
 
     public void reject(String orderId) {
-        Order order = orderRepo.findById(orderId)
+        orderRepo.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId));
-        order.changeStatus(OrderStatus.REJECTED);
         orderRepo.updateStatus(orderId, OrderStatus.REJECTED);
     }
 }

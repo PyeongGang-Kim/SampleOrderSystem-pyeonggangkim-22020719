@@ -2,7 +2,6 @@ package com.example.sampleordersystem.controller;
 
 import com.example.sampleordersystem.model.order.Order;
 import com.example.sampleordersystem.model.order.OrderStatus;
-import com.example.sampleordersystem.model.sample.Sample;
 import com.example.sampleordersystem.service.ApprovalService;
 import com.example.sampleordersystem.service.InventoryService;
 import com.example.sampleordersystem.service.OrderService;
@@ -10,7 +9,6 @@ import com.example.sampleordersystem.service.SampleService;
 import com.example.sampleordersystem.util.Paginator;
 import com.example.sampleordersystem.view.ApprovalView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ApprovalController {
@@ -50,7 +48,7 @@ public class ApprovalController {
         while (true) {
             int total = Paginator.totalPages(reserved);
             List<Order> pageItems = Paginator.paginate(reserved, page);
-            view.showReservedTable(buildReservedHeaders(), buildReservedRows(pageItems), page, total);
+            view.showReservedTable(OrderTableFormatter.DEFAULT_HEADERS, buildReservedRows(pageItems), page, total);
             String nav = view.readPageNav(page, total);
             if ("0".equals(nav)) return;
             if ("p".equals(nav)) { if (page > 1) page--; continue; }
@@ -66,7 +64,7 @@ public class ApprovalController {
         while (true) {
             int total = Paginator.totalPages(orders);
             List<Order> pageItems = Paginator.paginate(orders, page);
-            view.showAllOrdersTable(buildAllHeaders(), buildAllRows(pageItems), page, total);
+            view.showAllOrdersTable(OrderTableFormatter.FULL_HEADERS, buildAllRows(pageItems), page, total);
             String nav = view.readPageNavReadOnly(page, total);
             if ("0".equals(nav)) return;
             if ("p".equals(nav)) { if (page > 1) page--; }
@@ -85,7 +83,7 @@ public class ApprovalController {
         while (true) {
             int total = Paginator.totalPages(orders);
             List<Order> pageItems = Paginator.paginate(orders, page);
-            view.showSearchResultTable(buildAllHeaders(), buildAllRows(pageItems), page, total);
+            view.showSearchResultTable(OrderTableFormatter.FULL_HEADERS, buildAllRows(pageItems), page, total);
             String nav = view.readPageNavReadOnly(page, total);
             if ("0".equals(nav)) return;
             if ("p".equals(nav)) { if (page > 1) page--; }
@@ -113,8 +111,7 @@ public class ApprovalController {
 
     private void handleApprove(Order order) {
         try {
-            String sampleName = sampleSvc.findById(order.getSampleId())
-                    .map(Sample::getName).orElse("(알 수 없음)");
+            String sampleName = sampleSvc.resolveSampleName(order.getSampleId());
             int currentStock = inventorySvc.getInventorySummary(order.getSampleId()).stockQuantity();
             view.showStockInfo(sampleName, currentStock, order.getQuantity());
             if (view.confirmApprove()) {
@@ -135,34 +132,11 @@ public class ApprovalController {
         }
     }
 
-    private List<String> buildReservedHeaders() {
-        return List.of("주문 ID", "시료명", "고객명", "수량", "등록일시");
-    }
-
-    private List<String> buildAllHeaders() {
-        return List.of("주문 ID", "시료명", "고객명", "수량", "상태", "등록일시");
-    }
-
     private List<List<String>> buildReservedRows(List<Order> orders) {
-        List<List<String>> rows = new ArrayList<>();
-        for (Order o : orders) {
-            String sampleName = o.getSampleId() == null ? "(삭제됨)" :
-                    sampleSvc.findById(o.getSampleId()).map(Sample::getName).orElse("(알 수 없음)");
-            rows.add(List.of(o.getId(), sampleName, o.getCustomerName(),
-                    String.valueOf(o.getQuantity()), o.getCreatedAt().toString()));
-        }
-        return rows;
+        return OrderTableFormatter.buildRows(orders, sampleSvc);
     }
 
     private List<List<String>> buildAllRows(List<Order> orders) {
-        List<List<String>> rows = new ArrayList<>();
-        for (Order o : orders) {
-            String sampleName = o.getSampleId() == null ? "(삭제됨)" :
-                    sampleSvc.findById(o.getSampleId()).map(Sample::getName).orElse("(알 수 없음)");
-            rows.add(List.of(o.getId(), sampleName, o.getCustomerName(),
-                    String.valueOf(o.getQuantity()), o.getStatus().name(),
-                    o.getCreatedAt().toString()));
-        }
-        return rows;
+        return OrderTableFormatter.buildRowsWithStatus(orders, sampleSvc);
     }
 }

@@ -39,38 +39,43 @@ public class ProductionService {
     }
 
     public void advance(int minutes) {
-        List<ProductionSchedule> schedules = prodScheduleRepo.findAllOrderByCreatedAt();
-        for (ProductionSchedule schedule : schedules) {
-            Sample sample = sampleRepo.findById(schedule.getSampleId())
-                    .orElseThrow(() -> new IllegalStateException("시료를 찾을 수 없습니다: " + schedule.getSampleId()));
-
-            // 실제 생산량 = prodRate * yield * 0.9 * minutes (버림)
-            int produced = (int) (sample.getProdRate() * sample.getYield() * 0.9 * minutes);
-            schedule.addProduced(produced);
-
-            Stock stock = stockRepo.findBySampleId(schedule.getSampleId())
-                    .orElseThrow(() -> new IllegalStateException("재고를 찾을 수 없습니다: " + schedule.getSampleId()));
-            stock.add(produced);
-            stockRepo.update(stock);
-
+        for (ProductionSchedule schedule : prodScheduleRepo.findAllOrderByCreatedAt()) {
+            Stock stock = produce(schedule, minutes);
             if (schedule.isComplete()) {
-                Order completedOrder = orderRepo.findById(schedule.getOrderId())
-                        .orElseThrow(() -> new IllegalStateException("주문을 찾을 수 없습니다: " + schedule.getOrderId()));
-                int orderQty = completedOrder.getQuantity();
-
-                PendingShipmentStock pending = pendingRepo.findBySampleId(schedule.getSampleId())
-                        .orElseThrow(() -> new IllegalStateException("배송대기 재고를 찾을 수 없습니다: " + schedule.getSampleId()));
-                pending.add(orderQty);
-                pendingRepo.update(pending);
-
-                stock.subtract(orderQty);
-                stockRepo.update(stock);
-
-                orderRepo.updateStatus(schedule.getOrderId(), OrderStatus.CONFIRMED);
-                prodScheduleRepo.deleteById(schedule.getId());
+                completeProduction(schedule, stock);
             } else {
                 prodScheduleRepo.update(schedule);
             }
         }
+    }
+
+    private Stock produce(ProductionSchedule schedule, int minutes) {
+        Sample sample = sampleRepo.findById(schedule.getSampleId())
+                .orElseThrow(() -> new IllegalStateException("시료를 찾을 수 없습니다: " + schedule.getSampleId()));
+        int produced = (int) (sample.getProdRate() * sample.getYield() * 0.9 * minutes);
+        schedule.addProduced(produced);
+
+        Stock stock = stockRepo.findBySampleId(schedule.getSampleId())
+                .orElseThrow(() -> new IllegalStateException("재고를 찾을 수 없습니다: " + schedule.getSampleId()));
+        stock.add(produced);
+        stockRepo.update(stock);
+        return stock;
+    }
+
+    private void completeProduction(ProductionSchedule schedule, Stock stock) {
+        int orderQty = orderRepo.findById(schedule.getOrderId())
+                .orElseThrow(() -> new IllegalStateException("주문을 찾을 수 없습니다: " + schedule.getOrderId()))
+                .getQuantity();
+
+        PendingShipmentStock pending = pendingRepo.findBySampleId(schedule.getSampleId())
+                .orElseThrow(() -> new IllegalStateException("배송대기 재고를 찾을 수 없습니다: " + schedule.getSampleId()));
+        pending.add(orderQty);
+        pendingRepo.update(pending);
+
+        stock.subtract(orderQty);
+        stockRepo.update(stock);
+
+        orderRepo.updateStatus(schedule.getOrderId(), OrderStatus.CONFIRMED);
+        prodScheduleRepo.deleteById(schedule.getId());
     }
 }
