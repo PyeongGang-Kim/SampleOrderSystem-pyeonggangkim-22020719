@@ -1,5 +1,34 @@
 # SampleOrderSystem 아키텍처 설계
 
+## 0. 개발 방법론
+
+### TDD (Test-Driven Development)
+모든 기능 구현은 `superpowers:test-driven-development` 스킬을 적용한 TDD 사이클로 진행한다.
+
+```
+Red   → 실패하는 테스트 먼저 작성
+Green → 테스트를 통과하는 최소한의 구현 작성
+Refactor → 동작을 유지하면서 코드 개선
+```
+
+TDD 적용 원칙:
+- 구현 코드보다 테스트 코드를 먼저 작성한다.
+- 테스트는 `src/test/java/` 하위에 구현 클래스와 동일한 패키지 구조로 작성한다.
+- 테스트 클래스명은 `{구현클래스명}Test` 규칙을 따른다.
+- 각 테스트 메서드는 하나의 동작만 검증한다.
+- 비즈니스 로직을 가진 Model, Service 클래스를 우선적으로 TDD로 구현하고, Repository는 인터페이스 기반으로 테스트한다.
+
+TDD 우선 적용 대상 (비즈니스 로직 집중):
+- `OrderStatus`: 상태 전환 허용/거부 규칙
+- `Inventory`, `Stock`, `PendingShipmentStock`: 수량 증감 및 잔량 부족 예외
+- `ProductionService`: 생산량 계산 공식, 생산 완료 자동 전환
+- `ApprovalService`: 재고 충분/부족 분기 로직
+- `OrderIdGenerator`: ID 형식 및 시퀀스 생성
+- `SampleService`: 삭제 제약 조건 검증
+- `Paginator`: 페이지 분할 로직
+
+---
+
 ## 1. 기술 스택 및 참조 프로젝트 활용 방침
 
 - 언어: Java 17
