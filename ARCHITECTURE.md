@@ -242,16 +242,30 @@ CREATE TABLE production_schedules (
 1. ProductionService.advance(minutes) 호출
 2. 현재 생산 스케쥴을 FIFO 순으로 조회 (created_at ASC)
 3. 각 스케쥴에 대해:
-   - 분당 실제 생산량 = prodRate / (yield * 0.9)
+   - 분당 실제 생산량 = prodRate * yield * 0.9
    - 이번 명령으로 생산 가능 총량 = 분당 실제 생산량 * minutes
    - 최적화: 반복 없이 한 번에 생산량 계산 (나눗셈으로 필요 분 계산)
    - Stock에 생산량 add()
    - producedQuantity 업데이트
 4. isComplete() == true인 스케쥴:
    - 스케쥴 제거
-   - Stock.subtract(targetQuantity)
-   - PendingShipmentStock.add(targetQuantity)
+   - Stock.subtract(주문 원래 수량)
+   - PendingShipmentStock.add(주문 원래 수량)
    - Order 상태 CONFIRMED 자동 전환
+
+---
+
+## 7-1. 생산라인 화면 구성
+
+### 생산 현황 표기
+- `ProductionService.getSchedules()`의 첫 번째 항목(FIFO 기준 현재 생산 중)만 상세 표시
+- 표시 항목: 스케줄 ID, 주문ID, 시료명, 목표 수량(부족분), 현재 생산량, 잔여 수량
+- 스케줄이 없으면 "현재 생산 중인 항목이 없습니다." 출력
+
+### 대기 주문 확인
+- `ProductionService.getSchedules()` 전체 목록을 FIFO 순으로 페이징 출력
+- 표시 항목: 스케줄 ID, 주문ID, 시료명, 목표 수량(부족분), 현재 생산량, 잔여 수량
+- 기존 "생산 현황 표기"에서 보여주던 전체 스케줄 목록을 이 화면에서 담당
 
 ---
 

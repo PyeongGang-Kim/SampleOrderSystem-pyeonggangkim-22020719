@@ -1,6 +1,5 @@
 package com.example.sampleordersystem.controller;
 
-import com.example.sampleordersystem.model.order.Order;
 import com.example.sampleordersystem.model.production.ProductionSchedule;
 import com.example.sampleordersystem.model.sample.Sample;
 import com.example.sampleordersystem.service.ProductionService;
@@ -38,6 +37,28 @@ public class ProductionController {
 
     private void showSchedules() {
         List<ProductionSchedule> schedules = productionSvc.getSchedules();
+        if (schedules.isEmpty()) {
+            view.showNoCurrentSchedule();
+            readEnter();
+            return;
+        }
+        ProductionSchedule current = schedules.get(0);
+        String sampleName = sampleSvc.findById(current.getSampleId())
+                .map(Sample::getName).orElse("(알 수 없음)");
+        int remaining = current.getTargetQuantity() - current.getProducedQuantity();
+        view.showCurrentScheduleDetail(
+                String.valueOf(current.getId()),
+                current.getOrderId(),
+                sampleName,
+                String.valueOf(current.getTargetQuantity()),
+                String.valueOf(current.getProducedQuantity()),
+                String.valueOf(remaining)
+        );
+        readEnter();
+    }
+
+    private void showPendingOrders() {
+        List<ProductionSchedule> schedules = productionSvc.getSchedules();
         List<String> headers = List.of("스케쥴ID", "주문ID", "시료명", "목표 수량", "현재 생산량", "잔여 수량");
         int page = 1;
         while (true) {
@@ -51,20 +72,6 @@ public class ProductionController {
             if ("p".equals(nav) && page > 1) page--;
             else if ("n".equals(nav) && page < total) page++;
         }
-    }
-
-    private void showPendingOrders() {
-        List<Order> pending = productionSvc.getPendingOrders();
-        List<String> headers = List.of("주문ID", "시료명", "주문 수량", "등록 시각");
-        List<List<String>> rows = new ArrayList<>();
-        for (Order o : pending) {
-            String sampleName = o.getSampleId() == null ? "(삭제됨)" :
-                    sampleSvc.findById(o.getSampleId()).map(Sample::getName).orElse("(알 수 없음)");
-            rows.add(List.of(o.getId(), sampleName,
-                    String.valueOf(o.getQuantity()), o.getCreatedAt().toString()));
-        }
-        view.showPendingOrderTable(headers, rows);
-        readEnter();
     }
 
     private List<List<String>> buildScheduleRows(List<ProductionSchedule> schedules) {

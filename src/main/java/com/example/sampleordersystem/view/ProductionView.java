@@ -18,13 +18,23 @@ public class ProductionView {
         return ConsoleUtil.readLine("> ");
     }
 
-    public void showScheduleTable(List<String> headers, List<List<String>> rows, int page, int totalPages) {
-        System.out.println(String.format("\n[생산 현황] 페이지 %d / %d", page, totalPages == 0 ? 1 : totalPages));
-        TablePrinter.print(headers, rows);
+    public void showNoCurrentSchedule() {
+        System.out.println("\n[생산 현황] 현재 생산 중인 항목이 없습니다.");
     }
 
-    public void showPendingOrderTable(List<String> headers, List<List<String>> rows) {
-        System.out.println("\n[생산 대기 주문]");
+    public void showCurrentScheduleDetail(String scheduleId, String orderId, String sampleName,
+                                           String targetQty, String producedQty, String remaining) {
+        System.out.println("\n[현재 생산 중]");
+        System.out.println("  스케줄 ID  : " + scheduleId);
+        System.out.println("  주문 ID    : " + orderId);
+        System.out.println("  시료명     : " + sampleName);
+        System.out.println("  목표 수량  : " + targetQty);
+        System.out.println("  현재 생산량: " + producedQty);
+        System.out.println("  잔여 수량  : " + remaining);
+    }
+
+    public void showScheduleTable(List<String> headers, List<List<String>> rows, int page, int totalPages) {
+        System.out.println(String.format("\n[대기 주문 목록] 페이지 %d / %d", page, totalPages == 0 ? 1 : totalPages));
         TablePrinter.print(headers, rows);
     }
 

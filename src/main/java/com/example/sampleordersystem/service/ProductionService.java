@@ -2,6 +2,7 @@ package com.example.sampleordersystem.service;
 
 import com.example.sampleordersystem.model.inventory.PendingShipmentStock;
 import com.example.sampleordersystem.model.inventory.Stock;
+import com.example.sampleordersystem.model.order.Order;
 import com.example.sampleordersystem.model.order.OrderStatus;
 import com.example.sampleordersystem.model.production.ProductionSchedule;
 import com.example.sampleordersystem.model.sample.Sample;
@@ -10,8 +11,6 @@ import com.example.sampleordersystem.repository.PendingShipmentStockRepository;
 import com.example.sampleordersystem.repository.ProductionScheduleRepository;
 import com.example.sampleordersystem.repository.SampleRepository;
 import com.example.sampleordersystem.repository.StockRepository;
-
-import com.example.sampleordersystem.model.order.Order;
 
 import java.util.List;
 
@@ -39,18 +38,14 @@ public class ProductionService {
         return prodScheduleRepo.findAllOrderByCreatedAt();
     }
 
-    public List<Order> getPendingOrders() {
-        return orderRepo.findByStatus(OrderStatus.PRODUCING);
-    }
-
     public void advance(int minutes) {
         List<ProductionSchedule> schedules = prodScheduleRepo.findAllOrderByCreatedAt();
         for (ProductionSchedule schedule : schedules) {
             Sample sample = sampleRepo.findById(schedule.getSampleId())
                     .orElseThrow(() -> new IllegalStateException("시료를 찾을 수 없습니다: " + schedule.getSampleId()));
 
-            // 생산량 = prodRate / (yield * 0.9) * minutes (버림)
-            int produced = (int) (sample.getProdRate() / (sample.getYield() * 0.9) * minutes);
+            // 실제 생산량 = prodRate * yield * 0.9 * minutes (버림)
+            int produced = (int) (sample.getProdRate() * sample.getYield() * 0.9 * minutes);
             schedule.addProduced(produced);
 
             Stock stock = stockRepo.findBySampleId(schedule.getSampleId())
@@ -59,14 +54,16 @@ public class ProductionService {
             stockRepo.update(stock);
 
             if (schedule.isComplete()) {
-                int targetQty = schedule.getTargetQuantity();
+                Order completedOrder = orderRepo.findById(schedule.getOrderId())
+                        .orElseThrow(() -> new IllegalStateException("주문을 찾을 수 없습니다: " + schedule.getOrderId()));
+                int orderQty = completedOrder.getQuantity();
 
                 PendingShipmentStock pending = pendingRepo.findBySampleId(schedule.getSampleId())
                         .orElseThrow(() -> new IllegalStateException("배송대기 재고를 찾을 수 없습니다: " + schedule.getSampleId()));
-                pending.add(targetQty);
+                pending.add(orderQty);
                 pendingRepo.update(pending);
 
-                stock.subtract(targetQty);
+                stock.subtract(orderQty);
                 stockRepo.update(stock);
 
                 orderRepo.updateStatus(schedule.getOrderId(), OrderStatus.CONFIRMED);

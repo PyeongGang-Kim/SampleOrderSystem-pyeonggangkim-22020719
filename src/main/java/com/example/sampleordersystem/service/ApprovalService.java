@@ -50,7 +50,8 @@ public class ApprovalService {
             orderRepo.updateStatus(orderId, OrderStatus.CONFIRMED);
         } else {
             orderRepo.updateStatus(orderId, OrderStatus.PRODUCING);
-            prodScheduleRepo.save(new ProductionSchedule(null, orderId, order.getSampleId(), order.getQuantity(), 0));
+            int deficit = order.getQuantity() - stock.getQuantity();
+            prodScheduleRepo.save(new ProductionSchedule(null, orderId, order.getSampleId(), deficit, 0));
         }
     }
 

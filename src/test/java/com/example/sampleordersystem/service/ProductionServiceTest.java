@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -60,7 +61,7 @@ class ProductionServiceTest {
 
     @Test
     void 생산_진행_시_생산량이_재고에_반영된다() {
-        // prodRate=60, yield=0.9, 90%기준=0.81, 1분당 생산: 60/(0.81) ≈ 74.07 (버림 = 74)
+        // prodRate=60, yield=0.9 → 1분당 60*0.9*0.9 = 48개
         stockRepo.save(new Stock(sampleId, 0));
         pendingRepo.save(new PendingShipmentStock(sampleId, 0));
         orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 500));
@@ -70,17 +71,17 @@ class ProductionServiceTest {
         productionService.advance(1);
 
         int stock = stockRepo.findBySampleId(sampleId).orElseThrow().getQuantity();
-        assertTrue(stock > 0, "1분 후 재고는 0보다 커야 한다");
+        assertEquals(48, stock, "1분 후 재고는 48이어야 한다");
     }
 
     @Test
     void 생산_완료_시_주문이_CONFIRMED로_전환된다() {
-        // prodRate=60, yield=0.9 → 1분당 60/(0.81)≈74개, targetQuantity=50이면 1분에 완료
+        // prodRate=60, yield=0.9 → 1분당 48개, targetQuantity=40이면 1분에 완료
         stockRepo.save(new Stock(sampleId, 0));
         pendingRepo.save(new PendingShipmentStock(sampleId, 0));
-        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 50));
+        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 40));
         orderRepo.updateStatus("20240115_0001", OrderStatus.PRODUCING);
-        prodScheduleRepo.save(new ProductionSchedule(null, "20240115_0001", sampleId, 50, 0));
+        prodScheduleRepo.save(new ProductionSchedule(null, "20240115_0001", sampleId, 40, 0));
 
         productionService.advance(1);
 
@@ -90,14 +91,34 @@ class ProductionServiceTest {
 
     @Test
     void 생산_완료_시_생산된_수량이_배송대기재고에_반영된다() {
+        // 생산 완료 시 targetQuantity만큼 PendingShipmentStock에 반영
         stockRepo.save(new Stock(sampleId, 0));
         pendingRepo.save(new PendingShipmentStock(sampleId, 0));
-        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 50));
+        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 40));
         orderRepo.updateStatus("20240115_0001", OrderStatus.PRODUCING);
-        prodScheduleRepo.save(new ProductionSchedule(null, "20240115_0001", sampleId, 50, 0));
+        prodScheduleRepo.save(new ProductionSchedule(null, "20240115_0001", sampleId, 40, 0));
 
         productionService.advance(1);
 
-        assertEquals(50, pendingRepo.findBySampleId(sampleId).orElseThrow().getQuantity());
+        assertEquals(40, pendingRepo.findBySampleId(sampleId).orElseThrow().getQuantity());
+    }
+
+    @Test
+    void 스케줄_목록은_등록_순서대로_반환된다() {
+        // 생산 현황 화면에서 첫 번째 항목이 현재 생산 중인 항목이어야 한다
+        stockRepo.save(new Stock(sampleId, 0));
+        pendingRepo.save(new PendingShipmentStock(sampleId, 0));
+        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 1000));
+        orderRepo.save(new Order("20240115_0002", sampleId, "김철수", 2000));
+        orderRepo.updateStatus("20240115_0001", OrderStatus.PRODUCING);
+        orderRepo.updateStatus("20240115_0002", OrderStatus.PRODUCING);
+        prodScheduleRepo.save(new ProductionSchedule(null, "20240115_0001", sampleId, 1000, 0));
+        prodScheduleRepo.save(new ProductionSchedule(null, "20240115_0002", sampleId, 2000, 0));
+
+        List<ProductionSchedule> schedules = productionService.getSchedules();
+
+        assertEquals(2, schedules.size());
+        assertEquals("20240115_0001", schedules.get(0).getOrderId(), "먼저 등록된 주문이 첫 번째여야 한다");
+        assertEquals("20240115_0002", schedules.get(1).getOrderId());
     }
 }
