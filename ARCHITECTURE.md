@@ -274,7 +274,7 @@ CREATE TABLE production_schedules (
 1. ApprovalService.approve(orderId) 호출
 2. Stock.quantity >= order.quantity 여부 확인
 3. 재고 충분: Stock.subtract(quantity) → PendingShipmentStock.add(quantity) → Order 상태 CONFIRMED
-4. 재고 부족: ProductionSchedule 등록 → Order 상태 PRODUCING
+4. 재고 부족: ProductionSchedule 등록 (targetQuantity = order.quantity - stock.quantity, 부족분) → Order 상태 PRODUCING
 
 ---
 
