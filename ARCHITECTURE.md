@@ -243,8 +243,7 @@ CREATE TABLE production_schedules (
 2. 현재 생산 스케쥴을 FIFO 순으로 조회 (created_at ASC)
 3. 각 스케쥴에 대해:
    - 분당 실제 생산량 = prodRate * yield * 0.9
-   - 이번 명령으로 생산 가능 총량 = 분당 실제 생산량 * minutes
-   - 최적화: 반복 없이 한 번에 생산량 계산 (나눗셈으로 필요 분 계산)
+   - 이번 명령으로 생산 가능 총량 = 분당 실제 생산량 * minutes (한 번의 곱셈으로 계산, 반복 없음)
    - Stock에 생산량 add()
    - producedQuantity 업데이트
 4. isComplete() == true인 스케쥴:
