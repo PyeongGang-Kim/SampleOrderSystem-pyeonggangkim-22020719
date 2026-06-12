@@ -8,10 +8,10 @@ import java.util.List;
 public class ProductionView {
 
     public void showSubMenu() {
-        System.out.println("\n----- 생산 라인 -----");
-        System.out.println(" 1. 생산 현황");
-        System.out.println(" 2. 대기 주문");
-        System.out.println(" 0. 뒤로");
+        System.out.println();
+        System.out.println("  ┌─ 생산 라인 ─────────────────────────────────");
+        System.out.println("  │  1. 생산 현황    2. 대기 주문    0. 뒤로");
+        System.out.println("  └────────────────────────────────────────────");
     }
 
     public String readChoice() {
@@ -19,18 +19,24 @@ public class ProductionView {
     }
 
     public void showNoCurrentSchedule() {
-        System.out.println("\n[생산 현황] 현재 생산 중인 항목이 없습니다.");
+        System.out.println();
+        System.out.println("  ──────────────────────────────────────────────────────");
+        System.out.println("   생산 현황  현재 생산 중인 항목이 없습니다.");
+        System.out.println("  ──────────────────────────────────────────────────────");
     }
 
     public void showCurrentScheduleDetail(String scheduleId, String orderId, String sampleName,
                                            String targetQty, String producedQty, String remaining) {
-        System.out.println("\n[현재 생산 중]");
-        System.out.println("  스케줄 ID  : " + scheduleId);
-        System.out.println("  주문 ID    : " + orderId);
-        System.out.println("  시료명     : " + sampleName);
-        System.out.println("  목표 수량  : " + targetQty);
-        System.out.println("  현재 생산량: " + producedQty);
-        System.out.println("  잔여 수량  : " + remaining);
+        System.out.println();
+        System.out.println("  ╔══ 현재 생산 중 ══════════════════════════════");
+        System.out.println("  ║  스케줄 ID   :  " + scheduleId);
+        System.out.println("  ║  주문 ID     :  " + orderId);
+        System.out.println("  ║  시료명      :  " + sampleName);
+        System.out.println("  ╠════════════════════════════════════════════");
+        System.out.println("  ║  목표 수량   :  " + targetQty);
+        System.out.println("  ║  현재 생산량 :  " + producedQty);
+        System.out.println("  ║  잔여 수량   :  " + remaining);
+        System.out.println("  ╚════════════════════════════════════════════");
     }
 
     public void showScheduleTable(List<String> headers, List<List<String>> rows, int page, int totalPages) {

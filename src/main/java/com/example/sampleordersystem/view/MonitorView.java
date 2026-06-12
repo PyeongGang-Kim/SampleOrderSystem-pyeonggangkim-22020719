@@ -8,10 +8,10 @@ import java.util.List;
 public class MonitorView {
 
     public void showSubMenu() {
-        System.out.println("\n----- 모니터링 -----");
-        System.out.println(" 1. 주문량 확인");
-        System.out.println(" 2. 재고량 확인");
-        System.out.println(" 0. 뒤로");
+        System.out.println();
+        System.out.println("  ┌─ 모니터링 ──────────────────────────────────");
+        System.out.println("  │  1. 주문량 확인    2. 재고량 확인    0. 뒤로");
+        System.out.println("  └────────────────────────────────────────────");
     }
 
     public String readChoice() {
@@ -19,11 +19,13 @@ public class MonitorView {
     }
 
     public void showOrderSummary(int reserved, int confirmed, int producing, int release) {
-        System.out.println("\n[주문량 현황]");
-        System.out.printf("  RESERVED  (승인 대기): %d건%n", reserved);
-        System.out.printf("  PRODUCING (생산 중):   %d건%n", producing);
-        System.out.printf("  CONFIRMED (출고 대기): %d건%n", confirmed);
-        System.out.printf("  RELEASE   (출고 완료): %d건%n", release);
+        System.out.println();
+        System.out.println("  ╔══ 주문량 현황 ═════════════════════════════");
+        System.out.printf ("  ║  RESERVED  (승인 대기) :  %d건%n", reserved);
+        System.out.printf ("  ║  PRODUCING (생산 중)   :  %d건%n", producing);
+        System.out.printf ("  ║  CONFIRMED (출고 대기) :  %d건%n", confirmed);
+        System.out.printf ("  ║  RELEASE   (출고 완료) :  %d건%n", release);
+        System.out.println("  ╚════════════════════════════════════════════");
     }
 
     public void showInventoryTable(List<String> headers, List<List<String>> rows) {

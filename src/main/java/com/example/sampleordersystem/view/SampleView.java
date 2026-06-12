@@ -8,13 +8,12 @@ import java.util.List;
 public class SampleView {
 
     public void showSubMenu() {
-        System.out.println("\n----- 시료 관리 -----");
-        System.out.println(" 1. 시료 등록");
-        System.out.println(" 2. 시료 조회");
-        System.out.println(" 3. 시료 검색");
-        System.out.println(" 4. 시료 수정");
-        System.out.println(" 5. 시료 삭제");
-        System.out.println(" 0. 뒤로");
+        System.out.println();
+        System.out.println("  ┌─ 시료 관리 ─────────────────────────────────");
+        System.out.println("  │  1. 시료 등록    2. 시료 조회");
+        System.out.println("  │  3. 시료 검색    4. 시료 수정");
+        System.out.println("  │  5. 시료 삭제    0. 뒤로");
+        System.out.println("  └────────────────────────────────────────────");
     }
 
     public String readChoice() {
@@ -76,10 +75,10 @@ public class SampleView {
     }
 
     public void showSuccess(String msg) {
-        System.out.println("[완료] " + msg);
+        System.out.println("  [+] " + msg);
     }
 
     public void showError(String msg) {
-        System.out.println("[오류] " + msg);
+        System.out.println("  [!] " + msg);
     }
 }

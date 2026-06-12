@@ -17,18 +17,20 @@ public class ShippingView {
     }
 
     public void showShippingResult(String orderId, String sampleName, String customerName, int quantity) {
-        System.out.println("\n[출고 완료]");
-        System.out.println("  주문 ID: " + orderId);
-        System.out.println("  시료:    " + sampleName);
-        System.out.println("  고객:    " + customerName);
-        System.out.println("  수량:    " + quantity);
+        System.out.println();
+        System.out.println("  ╔══ 출고 완료 ═══════════════════════════════");
+        System.out.println("  ║  주문 ID  :  " + orderId);
+        System.out.println("  ║  시료     :  " + sampleName);
+        System.out.println("  ║  고객     :  " + customerName);
+        System.out.println("  ║  수량     :  " + quantity);
+        System.out.println("  ╚════════════════════════════════════════════");
     }
 
     public void showSuccess(String msg) {
-        System.out.println("[완료] " + msg);
+        System.out.println("  [+] " + msg);
     }
 
     public void showError(String msg) {
-        System.out.println("[오류] " + msg);
+        System.out.println("  [!] " + msg);
     }
 }

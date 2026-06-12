@@ -8,11 +8,13 @@ import java.util.List;
 public class ApprovalView {
 
     public void showSubMenu() {
-        System.out.println("\n----- 주문 -----");
-        System.out.println(" 1. 승인 대기 목록 조회");
-        System.out.println(" 2. 전체 주문 조회");
-        System.out.println(" 3. 주문 검색");
-        System.out.println(" 0. 뒤로");
+        System.out.println();
+        System.out.println("  ┌─ 주문 ──────────────────────────────────────");
+        System.out.println("  │  1. 승인 대기 목록 조회");
+        System.out.println("  │  2. 전체 주문 조회");
+        System.out.println("  │  3. 주문 검색");
+        System.out.println("  │  0. 뒤로");
+        System.out.println("  └────────────────────────────────────────────");
     }
 
     public String readChoice() {
@@ -54,16 +56,20 @@ public class ApprovalView {
     public void showStockInfo(String sampleName, int currentStock, int orderQty) {
         int afterStock = currentStock - orderQty;
         int shortage = Math.max(0, -afterStock);
-        System.out.println("\n[재고 현황]");
-        System.out.println("  시료: " + sampleName);
-        System.out.printf("  현재 재고:    %d%n", currentStock);
-        System.out.printf("  주문 수량:    %d%n", orderQty);
-        System.out.printf("  변경 후 재고: %d%n", Math.max(0, afterStock));
+        System.out.println();
+        System.out.println("  ╔══ 재고 현황 ═══════════════════════════════");
+        System.out.println("  ║  시료        :  " + sampleName);
+        System.out.printf ("  ║  현재 재고   :  %d%n", currentStock);
+        System.out.printf ("  ║  주문 수량   :  %d%n", orderQty);
+        System.out.printf ("  ║  변경 후 재고:  %d%n", Math.max(0, afterStock));
         if (shortage > 0) {
-            System.out.printf("  부족 수량:    %d  →  생산 라인 등록 예정%n", shortage);
+            System.out.println("  ╠════════════════════════════════════════════");
+            System.out.printf ("  ║  !! 부족 수량  %d  →  생산 라인 등록 예정%n", shortage);
         } else {
-            System.out.println("  → 재고 충분: 즉시 CONFIRMED 전환");
+            System.out.println("  ╠════════════════════════════════════════════");
+            System.out.println("  ║  >> 재고 충분  →  즉시 CONFIRMED 전환");
         }
+        System.out.println("  ╚════════════════════════════════════════════");
     }
 
     public boolean confirmApprove() {
@@ -72,10 +78,10 @@ public class ApprovalView {
     }
 
     public void showSuccess(String msg) {
-        System.out.println("[완료] " + msg);
+        System.out.println("  [+] " + msg);
     }
 
     public void showError(String msg) {
-        System.out.println("[오류] " + msg);
+        System.out.println("  [!] " + msg);
     }
 }

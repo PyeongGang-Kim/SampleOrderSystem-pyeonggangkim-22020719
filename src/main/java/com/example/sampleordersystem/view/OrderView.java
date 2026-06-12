@@ -26,11 +26,13 @@ public class OrderView {
     }
 
     public boolean confirmOrder(String sampleName, String customerName, int quantity) {
-        System.out.println("\n[주문 확인]");
-        System.out.println("  시료: " + sampleName);
-        System.out.println("  고객: " + customerName);
-        System.out.println("  수량: " + quantity);
-        String input = ConsoleUtil.readLine("주문을 확정하시겠습니까? (y/n): ");
+        System.out.println();
+        System.out.println("  ╔══ 주문 확인 ═══════════════════════════════");
+        System.out.println("  ║  시료  :  " + sampleName);
+        System.out.println("  ║  고객  :  " + customerName);
+        System.out.println("  ║  수량  :  " + quantity);
+        System.out.println("  ╚════════════════════════════════════════════");
+        String input = ConsoleUtil.readLine("  주문을 확정하시겠습니까? (y/n): ");
         return "y".equalsIgnoreCase(input);
     }
 
@@ -44,10 +46,10 @@ public class OrderView {
     }
 
     public void showSuccess(String msg) {
-        System.out.println("[완료] " + msg);
+        System.out.println("  [+] " + msg);
     }
 
     public void showError(String msg) {
-        System.out.println("[오류] " + msg);
+        System.out.println("  [!] " + msg);
     }
 }
