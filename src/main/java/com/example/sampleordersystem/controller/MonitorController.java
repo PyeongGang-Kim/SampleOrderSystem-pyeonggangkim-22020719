@@ -68,6 +68,7 @@ public class MonitorController {
                         status
                 ));
             } catch (Exception e) {
+                System.err.println("[경고] 재고 조회 중 오류 (시료ID=" + s.getId() + "): " + e.getMessage());
                 rows.add(List.of(String.valueOf(s.getId()), s.getName(), "-", "-", "-", "-", "-"));
             }
         }

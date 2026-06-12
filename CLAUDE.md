@@ -53,8 +53,8 @@ TDD 우선 적용 대상: `OrderStatus`, `Inventory` 계층, `ProductionService`
 - PendingShipmentStock: CONFIRMED 전환 시 add(), RELEASE 처리 시 subtract()
 
 ### 생산량 계산
-- 분당 실제 생산량 = prodRate / (yield * 0.9)
-- 반복 루프 없이 나눗셈으로 한 번에 계산
+- 분당 실제 생산량 = prodRate * yield * 0.9
+- 반복 루프 없이 곱셈으로 한 번에 계산
 
 ## 코딩 규칙
 - 모든 JDBC 쿼리는 PreparedStatement 사용 (createStatement 금지)

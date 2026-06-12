@@ -30,10 +30,14 @@ public class InventoryService {
         int stockQty = stockRepo.findBySampleId(sampleId)
                 .orElseThrow(() -> new IllegalArgumentException("재고를 찾을 수 없습니다: " + sampleId))
                 .getQuantity();
-        if (stockQty == 0) return StockStatus.DEPLETED;
+        int pendingQty = pendingRepo.findBySampleId(sampleId)
+                .orElseThrow(() -> new IllegalArgumentException("배송대기 재고를 찾을 수 없습니다: " + sampleId))
+                .getQuantity();
+        int totalQty = stockQty + pendingQty;
+        if (totalQty == 0) return StockStatus.DEPLETED;
 
         int orderedQty = getOrderedQuantity(sampleId);
-        if (stockQty < orderedQty) return StockStatus.LOW;
+        if (totalQty < orderedQty) return StockStatus.LOW;
         return StockStatus.SUFFICIENT;
     }
 

@@ -104,6 +104,34 @@ class InventoryServiceTest {
     }
 
     @Test
+    void 일반재고가_0이어도_배송대기재고가_있으면_고갈이_아니다() {
+        stockRepo.save(new Stock(sampleId, 0));
+        pendingRepo.save(new PendingShipmentStock(sampleId, 10));
+
+        assertNotEquals(InventoryService.StockStatus.DEPLETED, inventoryService.getStockStatus(sampleId));
+    }
+
+    @Test
+    void 총재고가_주문된_수량보다_부족하면_부족_상태이다() {
+        // Stock=30, Pending=20 → 총=50, 주문=100 → LOW
+        stockRepo.save(new Stock(sampleId, 30));
+        pendingRepo.save(new PendingShipmentStock(sampleId, 20));
+        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 100));
+
+        assertEquals(InventoryService.StockStatus.LOW, inventoryService.getStockStatus(sampleId));
+    }
+
+    @Test
+    void 일반재고가_부족해도_배송대기재고_합산시_주문수량_이상이면_여유_상태이다() {
+        // Stock=30, Pending=70 → 총=100, 주문=100 → SUFFICIENT
+        stockRepo.save(new Stock(sampleId, 30));
+        pendingRepo.save(new PendingShipmentStock(sampleId, 70));
+        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 100));
+
+        assertEquals(InventoryService.StockStatus.SUFFICIENT, inventoryService.getStockStatus(sampleId));
+    }
+
+    @Test
     void 재고를_추가할_수_있다() {
         stockRepo.save(new Stock(sampleId, 50));
         inventoryService.addStock(sampleId, 30);

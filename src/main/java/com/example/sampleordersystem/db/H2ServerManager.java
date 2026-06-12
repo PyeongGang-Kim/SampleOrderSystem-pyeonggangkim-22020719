@@ -16,7 +16,8 @@ public class H2ServerManager {
 
     public static void start() {
         try {
-            server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092").start();
+            new java.io.File("data").mkdirs();
+            server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092", "-ifNotExists").start();
         } catch (SQLException e) {
             throw new RuntimeException("H2 서버 기동 실패", e);
         }

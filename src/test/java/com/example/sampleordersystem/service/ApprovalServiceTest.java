@@ -82,6 +82,19 @@ class ApprovalServiceTest {
     }
 
     @Test
+    void 재고_부족_시_생산스케쥴_목표수량은_부족분이다() {
+        // stock=50, order=100 → 부족분=50이 targetQuantity로 저장되어야 한다
+        stockRepo.save(new Stock(sampleId, 50));
+        pendingRepo.save(new PendingShipmentStock(sampleId, 0));
+        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 100));
+
+        approvalService.approve("20240115_0001");
+
+        int targetQty = prodScheduleRepo.findAllOrderByCreatedAt().get(0).getTargetQuantity();
+        assertEquals(50, targetQty, "목표 수량은 주문 수량(100) - 현재 재고(50) = 부족분(50)이어야 한다");
+    }
+
+    @Test
     void 재고가_0일_때_주문이_PRODUCING으로_전환된다() {
         stockRepo.save(new Stock(sampleId, 0));
         pendingRepo.save(new PendingShipmentStock(sampleId, 0));

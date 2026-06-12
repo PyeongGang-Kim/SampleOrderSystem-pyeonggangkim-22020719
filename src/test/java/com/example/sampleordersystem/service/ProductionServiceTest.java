@@ -104,6 +104,25 @@ class ProductionServiceTest {
     }
 
     @Test
+    void 부족분_생산_완료_시_배송대기재고는_주문_원래_수량이다() {
+        // stock=50, orderQty=100, targetQuantity=50(부족분)
+        // 생산 완료 후 PendingShipmentStock = 100 (주문 원래 수량), Stock = 47 (50+97-100)
+        stockRepo.save(new Stock(sampleId, 50));
+        pendingRepo.save(new PendingShipmentStock(sampleId, 0));
+        orderRepo.save(new Order("20240115_0001", sampleId, "홍길동", 100));
+        orderRepo.updateStatus("20240115_0001", OrderStatus.PRODUCING);
+        prodScheduleRepo.save(new ProductionSchedule(null, "20240115_0001", sampleId, 50, 0));
+
+        // prodRate=60, yield=0.9 → 2분에 (int)(60*0.9*0.9*2)=97개 생산 → targetQty(50) 초과 완료
+        productionService.advance(2);
+
+        assertEquals(OrderStatus.CONFIRMED, orderRepo.findById("20240115_0001").orElseThrow().getStatus());
+        assertEquals(100, pendingRepo.findBySampleId(sampleId).orElseThrow().getQuantity(),
+                "배송대기 재고는 주문 원래 수량(100)이어야 한다 (부족분 50이 아님)");
+        assertEquals(0, prodScheduleRepo.findAllOrderByCreatedAt().size());
+    }
+
+    @Test
     void 스케줄_목록은_등록_순서대로_반환된다() {
         // 생산 현황 화면에서 첫 번째 항목이 현재 생산 중인 항목이어야 한다
         stockRepo.save(new Stock(sampleId, 0));

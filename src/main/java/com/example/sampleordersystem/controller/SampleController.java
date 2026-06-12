@@ -134,7 +134,9 @@ public class SampleController {
                     case LOW -> "부족";
                     case SUFFICIENT -> "여유";
                 };
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                System.err.println("[경고] 재고 조회 중 오류 (시료ID=" + s.getId() + "): " + e.getMessage());
+            }
             rows.add(List.of(
                     String.valueOf(s.getId()),
                     s.getName(),
